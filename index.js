@@ -4,13 +4,16 @@ const { Boom } = require('@hapi/boom');
 const { default: makeWASocket, DisconnectReason, useMultiFileAuthState } = require('@whiskeysockets/baileys');
 const { GoogleSpreadsheet } = require('google-spreadsheet');
 const qrcode = require('qrcode-terminal');
-const creds = require('./auth.json');
+
+// 🔁 CAMBIO: Ya no usamos require('./auth.json')
+const base64 = process.env.GOOGLE_SERVICE_ACCOUNT_BASE64;
+const decoded = Buffer.from(base64, 'base64').toString('utf8');
+const credentials = JSON.parse(decoded);
 
 const GROUPS = ['WHATSAPP 1🎯', 'WHATSAPP 2 🎯'];
 const SHEET_ID = '12DHE-5ybnIZqCnH_Em6uOiydSTkfz6bYHsANSu3GhCE';
 const ADMIN_PHONE = '+573172440053';
-// Para alertas personales, usa el número sin '+' para formar el JID
-const ALERT_PHONE = '61423758090';  // Australia
+const ALERT_PHONE = '61423758090';
 
 async function connectToWhatsApp() {
   const { state, saveCreds } = await useMultiFileAuthState('auth');
@@ -70,10 +73,9 @@ async function connectToWhatsApp() {
               await sendAlert(`⚠️ Solo quedan *2 cuentas* disponibles de *${platformRaw}*.`);
             }
           } else {
-            // Aviso al grupo
             const avisoGrupo = `⚠️ Estamos en Creación de Cuentas de *${platformRaw}* en este momento.` + '\nPor favor intenta en 10 minutos nuevamente.';
             await sock.sendMessage(msg.key.remoteJid, { text: avisoGrupo });
-            // Alerta a tu número personal
+
             console.log('[DEBUG] Enviando alerta personal a:', ALERT_PHONE);
             await sock.sendMessage(`${ALERT_PHONE}@s.whatsapp.net`, {
               text: `🚨 *Alerta de cuentas*\nSe solicitó *${platformRaw}${durationRaw ? ' ' + durationRaw : ''}* en “${groupName}” y no había cuentas disponibles.`
@@ -90,7 +92,7 @@ async function connectToWhatsApp() {
 
 async function getCuentasDisponibles(plataformaRaw, duracionRaw, cantidad) {
   const doc = new GoogleSpreadsheet(SHEET_ID);
-  await doc.useServiceAccountAuth(creds);
+  await doc.useServiceAccountAuth(credentials); // ✅ CAMBIO AQUÍ
   await doc.loadInfo();
 
   const platform = plataformaRaw;
@@ -137,7 +139,7 @@ async function getCuentasDisponibles(plataformaRaw, duracionRaw, cantidad) {
 
 async function cuentasRestantes(plataformaRaw) {
   const doc = new GoogleSpreadsheet(SHEET_ID);
-  await doc.useServiceAccountAuth(creds);
+  await doc.useServiceAccountAuth(credentials); // ✅ CAMBIO AQUÍ
   await doc.loadInfo();
   const matching = Object.keys(doc.sheetsByTitle).filter(t => t.toUpperCase().startsWith(plataformaRaw));
   let total = 0;
