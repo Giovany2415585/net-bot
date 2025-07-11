@@ -8,7 +8,7 @@ const qrcode = require('qrcode-terminal');
 // 🔁 CAMBIO: Ya no usamos require('./auth.json')
 const base64 = process.env.GOOGLE_SERVICE_ACCOUNT_BASE64;
 const decoded = Buffer.from(base64, 'base64').toString('utf8');
-const credentials = JSON.parse(decoded);
+const creds = JSON.parse(decoded);
 
 const GROUPS = ['WHATSAPP 1🎯', 'WHATSAPP 2 🎯'];
 const SHEET_ID = '12DHE-5ybnIZqCnH_Em6uOiydSTkfz6bYHsANSu3GhCE';
