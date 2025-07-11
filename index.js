@@ -5,10 +5,10 @@ const { default: makeWASocket, DisconnectReason, useMultiFileAuthState } = requi
 const { GoogleSpreadsheet } = require('google-spreadsheet');
 const qrcode = require('qrcode-terminal');
 
-// 🔁 CAMBIO: Ya no usamos require('./auth.json')
+// 🔁 CAMBIO APLICADO AQUÍ:
 const base64 = process.env.GOOGLE_SERVICE_ACCOUNT_BASE64;
 const decoded = Buffer.from(base64, 'base64').toString('utf8');
-const creds = JSON.parse(decoded);
+const credentials = JSON.parse(decoded); // renombrado a credentials para que coincida más adelante
 
 const GROUPS = ['WHATSAPP 1🎯', 'WHATSAPP 2 🎯'];
 const SHEET_ID = '12DHE-5ybnIZqCnH_Em6uOiydSTkfz6bYHsANSu3GhCE';
@@ -92,7 +92,7 @@ async function connectToWhatsApp() {
 
 async function getCuentasDisponibles(plataformaRaw, duracionRaw, cantidad) {
   const doc = new GoogleSpreadsheet(SHEET_ID);
-  await doc.useServiceAccountAuth(credentials); // ✅ CAMBIO AQUÍ
+  await doc.useServiceAccountAuth(credentials); // ✅ usando las credenciales decodificadas
   await doc.loadInfo();
 
   const platform = plataformaRaw;
@@ -139,7 +139,7 @@ async function getCuentasDisponibles(plataformaRaw, duracionRaw, cantidad) {
 
 async function cuentasRestantes(plataformaRaw) {
   const doc = new GoogleSpreadsheet(SHEET_ID);
-  await doc.useServiceAccountAuth(credentials); // ✅ CAMBIO AQUÍ
+  await doc.useServiceAccountAuth(credentials);
   await doc.loadInfo();
   const matching = Object.keys(doc.sheetsByTitle).filter(t => t.toUpperCase().startsWith(plataformaRaw));
   let total = 0;
